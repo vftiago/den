@@ -1,0 +1,43 @@
+{
+	"private": true,
+	"sideEffects": false,
+	"prisma": {
+		"seed": "node --require esbuild-register prisma/seed.ts"
+	},
+	"scripts": {
+		"build": "remix build",
+		"dev": "remix dev",
+		"start": "remix-serve build",
+		"prepare": "husky install"
+	},
+	"lint-staged": {
+		"**/*": "prettier --write --ignore-unknown"
+	},
+	"dependencies": {
+		"@prisma/client": "^4.1.0",
+		"@remix-run/node": "^1.6.3",
+		"@remix-run/react": "^1.6.3",
+		"@remix-run/serve": "^1.6.3",
+		"bcryptjs": "^2.4.3",
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
+	},
+	"devDependencies": {
+		"@remix-run/dev": "^1.6.3",
+		"@remix-run/eslint-config": "^1.6.3",
+		"@types/bcryptjs": "^2.4.2",
+		"@types/react": "18.0.15",
+		"@types/react-dom": "18.0.6",
+		"bson": "^4.6.5",
+		"esbuild-register": "^3.3.3",
+		"eslint": "^8.15.0",
+		"husky": "^8.0.1",
+		"lint-staged": "^13.0.3",
+		"prettier": "^2.7.1",
+		"prisma": "^4.1.0",
+		"typescript": "^4.6.4"
+	},
+	"engines": {
+		"node": ">=18"
+	}
+}

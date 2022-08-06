@@ -1,0 +1,37 @@
+// docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  String    @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  username            String    @unique
+  email               String?   @unique
+  passwordHash        String
+  authoredProverbs    Proverb[] @relation("authoredProverbs")
+  favoriteProverbsIds String[]  @db.ObjectId
+  favoriteProverbs    Proverb[] @relation("favoriteProverbs", fields: [favoriteProverbsIds], references: [id])
+}
+
+model Proverb {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  content        String
+  language       String
+  baseColor      String
+  viewCount      Int      @default(0)
+  favoriteCount  Int      @default(0)
+  authorId       String   @db.ObjectId
+  author         User     @relation("authoredProverbs", fields: [authorId], references: [id], onDelete: Cascade)
+  favoritedByIds String[] @db.ObjectId
+  favoritedBy    User[]   @relation("favoriteProverbs", fields: [favoritedByIds], references: [id])
+}
