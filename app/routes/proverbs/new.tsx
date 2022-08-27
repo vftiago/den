@@ -63,6 +63,7 @@ export const action: ActionFunction = async ({ request }) => {
 	const proverb = await db.proverb.create({
 		data: {
 			...fields,
+			approved: false,
 			baseColor: "red",
 			authorId: userId,
 		},

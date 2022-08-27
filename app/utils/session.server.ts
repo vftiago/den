@@ -1,5 +1,5 @@
-import bcrypt from "bcryptjs";
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
+import bcrypt from "bcryptjs";
 
 import { db } from "./db.server";
 
@@ -78,7 +78,7 @@ export async function getUser(request: Request) {
 	try {
 		const user = await db.user.findUnique({
 			where: { id: userId },
-			select: { id: true, username: true },
+			select: { id: true, username: true, role: true },
 		});
 		return user;
 	} catch {

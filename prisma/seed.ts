@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 import * as pt from "../data/pt.json";
 
 const db = new PrismaClient();
@@ -6,7 +6,8 @@ const db = new PrismaClient();
 async function seed() {
 	const seedUser = await db.user.create({
 		data: {
-			username: "seed-user",
+			username: "james",
+			role: Role.ADMIN,
 			passwordHash:
 				"$2b$10$K7L1OJ45/4Y2nIvhRVpCe.FSmhDdWoXehVzJptJ/op0lSsvqNu/1u",
 		},
@@ -31,6 +32,7 @@ function getProverbs() {
 			content: proverb,
 			language: "pt",
 			baseColor: "red",
+			approved: true,
 		};
 	});
 }

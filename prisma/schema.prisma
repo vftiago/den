@@ -9,6 +9,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id                  String    @id @default(auto()) @map("_id") @db.ObjectId
   createdAt           DateTime  @default(now())
@@ -19,6 +25,7 @@ model User {
   authoredProverbs    Proverb[] @relation("authoredProverbs")
   favoriteProverbsIds String[]  @db.ObjectId
   favoriteProverbs    Proverb[] @relation("favoriteProverbs", fields: [favoriteProverbsIds], references: [id])
+    role    Role      @default(USER)
 }
 
 model Proverb {
@@ -28,6 +35,7 @@ model Proverb {
   content        String
   language       String
   baseColor      String
+  approved       Boolean
   viewCount      Int      @default(0)
   favoriteCount  Int      @default(0)
   authorId       String   @db.ObjectId
