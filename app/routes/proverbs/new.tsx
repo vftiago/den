@@ -78,13 +78,7 @@ export default function NewProverbRoute() {
 	if (transition.submission) {
 		const content = transition.submission.formData.get("content");
 		if (typeof content === "string" && !validateProverbContent(content)) {
-			return (
-				<ProverbDisplay
-					proverb={{ content }}
-					isOwner={true}
-					canDelete={false}
-				/>
-			);
+			return <ProverbDisplay proverb={{ content }} canDelete={true} />;
 		}
 	}
 

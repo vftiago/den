@@ -1,4 +1,4 @@
-import type { Proverb } from "@prisma/client";
+import { Proverb, Role } from "@prisma/client";
 import {
 	ActionFunction,
 	json,
@@ -21,10 +21,9 @@ export const meta: MetaFunction = ({
 	description: data ? `"${data.proverb}"` : "Proverb not found.",
 });
 
-type LoaderData = { proverb: Proverb; isOwner: boolean };
+type LoaderData = { proverb: Proverb; canDelete: boolean };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
-	const userId = await getUserId(request);
 	const proverb = await db.proverb.findUnique({
 		where: { id: params.id },
 	});
@@ -34,22 +33,51 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 			status: 404,
 		});
 
-	const data: LoaderData = { proverb, isOwner: userId === proverb.authorId };
+	const userId = await getUserId(request);
+
+	let user,
+		canDelete = false;
+
+	if (userId) {
+		user = await db.user.findUnique({
+			where: { id: userId },
+			select: { role: true },
+		});
+
+		if (!user)
+			throw new Response(` User with id ${userId} not found.`, {
+				status: 404,
+			});
+
+		const isAdmin = user.role === Role.ADMIN;
+		const isModerator = user.role === Role.MODERATOR;
+		const isOwner = userId === proverb.authorId;
+
+		canDelete = isAdmin || isModerator || isOwner;
+	}
+
+	const data: LoaderData = {
+		proverb,
+		canDelete,
+	};
 
 	return json(data);
 };
 
 export const action: ActionFunction = async ({ request, params }) => {
 	const form = await request.formData();
+
 	if (form.get("_method") !== "delete") {
 		throw new Response(`The _method ${form.get("_method")} is not supported`, {
 			status: 400,
 		});
 	}
 	const userId = await requireUserId(request);
+
 	const proverb = await db.proverb.findUnique({
 		where: { id: params.id },
 	});
+
 	if (!proverb) {
 		throw new Response("Not found.", {
 			status: 404,
@@ -67,7 +95,8 @@ export const action: ActionFunction = async ({ request, params }) => {
 
 export default function ProverbRoute() {
 	const data = useLoaderData<LoaderData>();
-	return <ProverbDisplay proverb={data.proverb} isOwner={data.isOwner} />;
+
+	return <ProverbDisplay proverb={data.proverb} canDelete={data.canDelete} />;
 }
 
 export function CatchBoundary() {
@@ -83,11 +112,7 @@ export function CatchBoundary() {
 			);
 		}
 		case 404: {
-			return (
-				<div className="error-container">
-					Huh? What the heck is {params.id}?
-				</div>
-			);
+			return <div className="error-container">{params.id} not found.</div>;
 		}
 		case 401: {
 			return (
