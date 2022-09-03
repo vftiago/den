@@ -1,25 +1,24 @@
-import type { Proverb } from "@prisma/client";
 import type { LoaderFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Link, useCatch, useLoaderData } from "@remix-run/react";
 
 import { db } from "~/utils/db.server";
 
-type LoaderData = { randomProverb: Proverb };
+type LoaderData = {
+	proverbListItems: Array<{ id: string; content: string }>;
+};
 
 export const loader: LoaderFunction = async () => {
-	const count = await db.proverb.count();
-	const randomRowNumber = Math.floor(Math.random() * count);
-	const [randomProverb] = await db.proverb.findMany({
-		take: 1,
-		skip: randomRowNumber,
+	const proverbListItems = await db.proverb.findMany({
+		take: 100,
+		select: { id: true, content: true },
+		orderBy: { content: "asc" },
 	});
-	if (!randomProverb) {
-		throw new Response("Nothing found.", {
-			status: 404,
-		});
-	}
-	const data: LoaderData = { randomProverb };
+
+	const data: LoaderData = {
+		proverbListItems,
+	};
+
 	return json(data);
 };
 
@@ -28,11 +27,13 @@ export default function ProverbsIndexRoute() {
 
 	return (
 		<div>
-			<p>Here's a random proverb:</p>
-			<p>{data.randomProverb.content}</p>
-			<Link to={data.randomProverb.id}>
-				"{data.randomProverb.content}" Permalink
-			</Link>
+			<ul className="proverb-list">
+				{data.proverbListItems.map((proverb) => (
+					<li key={proverb.id}>
+						<Link to={proverb.id}>{proverb.content}</Link>
+					</li>
+				))}
+			</ul>
 		</div>
 	);
 }

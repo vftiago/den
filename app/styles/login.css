@@ -4,22 +4,6 @@
  * pages!
  */
 
-body {
-	background-image: var(--gradient-background);
-}
-
-.container {
-	min-height: inherit;
-}
-
-.container,
-.content {
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-}
-
 .content {
 	padding: 1rem;
 	background-color: hsl(0, 0%, 100%);
@@ -36,10 +20,6 @@ body {
 	}
 }
 
-h1 {
-	margin-top: 0;
-}
-
 fieldset {
 	display: flex;
 	justify-content: center;
@@ -47,18 +27,4 @@ fieldset {
 
 fieldset > :not(:last-child) {
 	margin-right: 2rem;
-}
-
-.links ul {
-	margin-top: 1rem;
-	padding: 0;
-	list-style: none;
-	display: flex;
-	gap: 1.5rem;
-	align-items: center;
-}
-
-.links a:hover {
-	text-decoration-style: wavy;
-	text-decoration-thickness: 1px;
 }

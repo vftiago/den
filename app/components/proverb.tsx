@@ -10,9 +10,8 @@ export function ProverbDisplay({
 }) {
 	return (
 		<div>
-			<p>Here's your hilarious joke:</p>
 			<p>{proverb.content}</p>
-			<Link to=".">{proverb.content} Permalink</Link>
+			<Link to=".">Permalink</Link>
 			{canDelete ? (
 				<Form method="post">
 					<input type="hidden" name="_method" value="delete" />

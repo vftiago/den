@@ -4,7 +4,7 @@ import type {
 	MetaFunction,
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { Form, Link, useActionData, useSearchParams } from "@remix-run/react";
+import { Form, useActionData, useSearchParams } from "@remix-run/react";
 
 import stylesUrl from "~/styles/login.css";
 import { db } from "~/utils/db.server";
@@ -218,16 +218,6 @@ export default function Login() {
 						Submit
 					</button>
 				</Form>
-			</div>
-			<div className="links">
-				<ul>
-					<li>
-						<Link to="/">Home</Link>
-					</li>
-					<li>
-						<Link to="/proverbs">Proverbs</Link>
-					</li>
-				</ul>
 			</div>
 		</div>
 	);

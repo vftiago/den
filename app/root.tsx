@@ -1,4 +1,9 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/node";
+import {
+	json,
+	LinksFunction,
+	LoaderFunction,
+	MetaFunction,
+} from "@remix-run/node";
 import {
 	Links,
 	LiveReload,
@@ -6,11 +11,18 @@ import {
 	Outlet,
 	Scripts,
 	useCatch,
+	useLoaderData,
 } from "@remix-run/react";
+import { Header } from "./components/header";
 
 import globalLargeStylesUrl from "./styles/global-large.css";
 import globalMediumStylesUrl from "./styles/global-medium.css";
 import globalStylesUrl from "./styles/global.css";
+import { getUser } from "./utils/session.server";
+
+type LoaderData = {
+	user: Awaited<ReturnType<typeof getUser>>;
+};
 
 export const links: LinksFunction = () => {
 	return [
@@ -47,6 +59,16 @@ export const meta: MetaFunction = () => {
 	};
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+	const user = await getUser(request);
+
+	const data: LoaderData = {
+		user,
+	};
+
+	return json(data);
+};
+
 function Document({
 	children,
 	title = `Proverbial Remix`,
@@ -71,8 +93,11 @@ function Document({
 }
 
 export default function App() {
+	const data = useLoaderData<LoaderData>();
+
 	return (
 		<Document>
+			<Header username={data.user?.username} />
 			<Outlet />
 		</Document>
 	);

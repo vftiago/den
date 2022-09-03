@@ -10,8 +10,10 @@
 :root {
 	--hs-links: 48 100%;
 	--color-foreground: hsl(0, 0%, 100%);
-	--color-background: hsl(278, 73%, 19%);
-	--color-links: hsl(var(--hs-links) 50%);
+	/* --color-background: hsl(278, 73%, 19%);
+	--color-links: hsl(var(--hs-links) 50%); */
+	--color-background: hsl(278, 50%, 40%);
+	--color-links: hsl(var(--hs-links) 80%);
 	--color-links-hover: hsl(var(--hs-links) 45%);
 	--color-border: hsl(277, 85%, 38%);
 	--color-invalid: hsl(356, 100%, 71%);
@@ -21,8 +23,9 @@
 		rgba(118, 15, 181, 1) 35%,
 		rgba(58, 13, 85, 1) 100%
 	);
-	--font-body: -apple-system, "Segoe UI", Helvetica Neue, Helvetica, Roboto,
-		Arial, sans-serif, system-ui, "Apple Color Emoji", "Segoe UI Emoji";
+	--font-body: "Quando-Regular", -apple-system, "Segoe UI", Helvetica Neue,
+		Helvetica, Roboto, Arial, sans-serif, system-ui, "Apple Color Emoji",
+		"Segoe UI Emoji";
 	--font-display: "Quando-Regular", var(--font-body);
 }
 
@@ -135,11 +138,61 @@ h6 {
 }
 
 .container {
+	min-height: inherit;
+}
+
+.container,
+.content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.content {
+	padding-top: 6rem;
+	padding-bottom: 6rem;
+}
+
+.container {
 	--gutter: 16px;
 	width: 1024px;
 	max-width: calc(100% - var(--gutter) * 2);
 	margin-right: auto;
 	margin-left: auto;
+}
+
+header {
+	position: fixed;
+	top: 0;
+	width: 100%;
+	padding: 0 1rem;
+	background-color: rgba(0, 0, 0, 0.2);
+	display: flex;
+	justify-content: space-between;
+}
+
+nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+nav ul {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	gap: 1rem;
+}
+
+nav .user-info {
+	display: flex;
+	gap: 1rem;
+	align-items: center;
+	white-space: nowrap;
 }
 
 /* buttons */
