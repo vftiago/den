@@ -9,11 +9,12 @@ export const Header = ({ username }: { username?: string }) => {
 			<nav>
 				<ul>
 					<li>
-						<Link to="/">Home</Link>
-					</li>
-					<li>
 						<Link to="/proverbs">List</Link>
 					</li>
+					<li>
+						<Link to=".">Random</Link>
+					</li>
+
 					<li>
 						<Link to="/proverbs/new" className="button">
 							Add your own
