@@ -15,6 +15,30 @@
 	align-items: center;
 	justify-content: center;
 	background-color: rgba(0, 0, 0, 0.2);
+	padding: 20px;
+}
+
+.modal-overlay {
+	position: fixed;
+	display: block;
+	overflow: auto;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 0.5);
+	z-index: 1;
+}
+
+.modal-content {
+	margin: 15% auto;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: 0.25rem;
+	width: 50vw;
+	padding: 2rem;
+	position: relative;
 }
 
 @media print, (min-width: 640px) {
