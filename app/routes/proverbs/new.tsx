@@ -33,6 +33,7 @@ type ActionData = {
 	};
 	fields?: {
 		content: string;
+		language: string;
 	};
 };
 
@@ -68,6 +69,7 @@ export const action: ActionFunction = async ({ request }) => {
 			authorId: userId,
 		},
 	});
+
 	return redirect(`/proverbs/${proverb.id}`);
 };
 
@@ -77,8 +79,20 @@ export default function NewProverbRoute() {
 
 	if (transition.submission) {
 		const content = transition.submission.formData.get("content");
-		if (typeof content === "string" && !validateProverbContent(content)) {
-			return <ProverbDisplay proverb={{ content }} canDelete={true} />;
+		const language = transition.submission.formData.get("language");
+
+		if (
+			typeof content === "string" &&
+			typeof language === "string" &&
+			!validateProverbContent(content)
+		) {
+			return (
+				<ProverbDisplay
+					proverb={{ content, language }}
+					userPermissions={{ canEdit: false, canDelete: false }}
+					actionData={actionData}
+				/>
+			);
 		}
 	}
 
@@ -90,8 +104,8 @@ export default function NewProverbRoute() {
 					<label>
 						Content:{" "}
 						<textarea
-							defaultValue={actionData?.fields?.content}
 							name="content"
+							defaultValue={actionData?.fields?.content}
 							aria-invalid={
 								Boolean(actionData?.fieldErrors?.content) || undefined
 							}
@@ -100,13 +114,6 @@ export default function NewProverbRoute() {
 							}
 						/>
 					</label>
-				</div>
-				<div>
-					<label>
-						Language: <textarea name="language" />
-					</label>
-				</div>
-				<div>
 					{actionData?.fieldErrors?.content ? (
 						<p
 							className="form-validation-error"
@@ -116,6 +123,17 @@ export default function NewProverbRoute() {
 							{actionData.fieldErrors.content}
 						</p>
 					) : null}
+				</div>
+				<div>
+					<label>
+						Language:{" "}
+						<textarea
+							name="language"
+							defaultValue={actionData?.fields?.language || "en"}
+						/>
+					</label>
+				</div>
+				<div>
 					<button type="submit" className="button">
 						Add
 					</button>
