@@ -10,9 +10,7 @@ export const Modal = ({ children, onClose }: ModalProps) => {
 	return (
 		<div className="modal-overlay">
 			<div className="modal-content">
-				<div style={{ width: " 24px" }}>
-					<XMarkIcon onClick={onClose} />
-				</div>
+				<XMarkIcon onClick={onClose} />
 				{children}
 			</div>
 		</div>
