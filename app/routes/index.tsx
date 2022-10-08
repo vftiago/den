@@ -1,14 +1,16 @@
-import { Proverb } from "@prisma/client";
+import { Proverb, Role } from "@prisma/client";
 import {
 	json,
 	LinksFunction,
 	LoaderFunction,
 	MetaFunction,
 } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
+import { ProverbDisplay } from "~/components/proverb";
 
 import stylesUrl from "~/styles/index.css";
 import { db } from "~/utils/db.server";
+import { getUserId } from "~/utils/session.server";
 
 export const links: LinksFunction = () => {
 	return [{ rel: "stylesheet", href: stylesUrl }];
@@ -19,24 +21,61 @@ export const meta: MetaFunction = () => ({
 	description: "The Proverbial Remix app.",
 });
 
-type LoaderData = {
-	randomProverb: Proverb;
+export type UserPermissions = {
+	canDelete: boolean;
+	canEdit: boolean;
 };
 
-export const loader: LoaderFunction = async () => {
+export type LoaderData = { proverb: Proverb; userPermissions: UserPermissions };
+
+export const loader: LoaderFunction = async ({ request }) => {
 	const count = await db.proverb.count();
 	const randomRowNumber = Math.floor(Math.random() * count);
-	const [randomProverb] = await db.proverb.findMany({
+	const [proverb] = await db.proverb.findMany({
 		take: 1,
 		skip: randomRowNumber,
 	});
-	if (!randomProverb) {
+
+	if (!proverb) {
 		throw new Response("Nothing found.", {
 			status: 404,
 		});
 	}
 
-	const data: LoaderData = { randomProverb };
+	let user,
+		canDelete = false,
+		canEdit = false;
+
+	const userId = await getUserId(request);
+
+	if (userId) {
+		user = await db.user.findUnique({
+			where: { id: userId },
+			select: { role: true },
+		});
+
+		if (!user)
+			throw new Response(` User with id ${userId} not found.`, {
+				status: 404,
+			});
+
+		const isAdmin = user.role === Role.ADMIN;
+		const isModerator = user.role === Role.MODERATOR;
+		const isOwner = userId === proverb.authorId;
+
+		// implement user permission/role system
+		canDelete = isAdmin || isModerator || isOwner;
+		canEdit = isAdmin || isModerator || isOwner;
+	}
+
+	const data: LoaderData = {
+		proverb,
+		userPermissions: {
+			canDelete,
+			canEdit,
+		},
+	};
+
 	return json(data);
 };
 
@@ -46,7 +85,10 @@ export default function IndexRoute() {
 	return (
 		<div className="container">
 			<main className="content">
-				<Link to=".">{data.randomProverb.content}</Link>
+				<ProverbDisplay
+					proverb={data.proverb}
+					userPermissions={data.userPermissions}
+				/>
 			</main>
 		</div>
 	);

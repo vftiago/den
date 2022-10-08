@@ -6,7 +6,12 @@ import {
 	MetaFunction,
 	redirect,
 } from "@remix-run/node";
-import { useCatch, useLoaderData, useParams } from "@remix-run/react";
+import {
+	useActionData,
+	useCatch,
+	useLoaderData,
+	useParams,
+} from "@remix-run/react";
 
 import { ProverbDisplay } from "~/components/proverb";
 import { db } from "~/utils/db.server";
@@ -21,7 +26,12 @@ export const meta: MetaFunction = ({
 	description: data ? `"${data.proverb}"` : "Proverb not found.",
 });
 
-type LoaderData = { proverb: Proverb; canDelete: boolean };
+type UserPermissions = {
+	canDelete: boolean;
+	canEdit: boolean;
+};
+
+type LoaderData = { proverb: Proverb; userPermissions: UserPermissions };
 
 export const loader: LoaderFunction = async ({ request, params }) => {
 	const proverb = await db.proverb.findUnique({
@@ -36,7 +46,8 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 	const userId = await getUserId(request);
 
 	let user,
-		canDelete = false;
+		canDelete = false,
+		canEdit = false;
 
 	if (userId) {
 		user = await db.user.findUnique({
@@ -53,25 +64,45 @@ export const loader: LoaderFunction = async ({ request, params }) => {
 		const isModerator = user.role === Role.MODERATOR;
 		const isOwner = userId === proverb.authorId;
 
+		// implement user permission/role system
 		canDelete = isAdmin || isModerator || isOwner;
+		canEdit = isAdmin || isModerator || isOwner;
 	}
 
 	const data: LoaderData = {
 		proverb,
-		canDelete,
+		userPermissions: {
+			canDelete,
+			canEdit,
+		},
 	};
 
 	return json(data);
 };
 
+// TODO extract duplicate types and helper functions
+type ActionData = {
+	formError?: string;
+	fieldErrors?: {
+		content: string | undefined;
+	};
+	fields?: {
+		content: string;
+		language: string;
+	};
+};
+
+const badRequest = (data: ActionData) => json(data, { status: 400 });
+
+function validateProverbContent(content: string) {
+	if (content.length < 10) {
+		return `Proverbs must have at least 10 characters.`;
+	}
+}
+
 export const action: ActionFunction = async ({ request, params }) => {
 	const form = await request.formData();
 
-	if (form.get("_method") !== "delete") {
-		throw new Response(`The _method ${form.get("_method")} is not supported`, {
-			status: 400,
-		});
-	}
 	const userId = await requireUserId(request);
 
 	const proverb = await db.proverb.findUnique({
@@ -88,15 +119,66 @@ export const action: ActionFunction = async ({ request, params }) => {
 			status: 401,
 		});
 	}
-	await db.proverb.delete({ where: { id: params.id } });
 
-	return redirect("/proverbs");
+	const method = form.get("_method");
+
+	switch (method) {
+		case "put":
+			const content = form.get("content");
+			const language = form.get("language");
+
+			if (typeof content !== "string" || typeof language !== "string") {
+				return badRequest({
+					formError: `Form not submitted correctly.`,
+				});
+			}
+
+			const fields = { content, language };
+
+			const fieldErrors = {
+				content: validateProverbContent(content),
+			};
+
+			if (Object.values(fieldErrors).some(Boolean)) {
+				return badRequest({ fieldErrors, fields });
+			}
+
+			await db.proverb.update({
+				where: { id: params.id },
+				data: {
+					content,
+					language,
+				},
+			});
+
+			return redirect("/proverbs");
+
+		case "delete":
+			await db.proverb.delete({ where: { id: params.id } });
+
+			return redirect("/proverbs");
+
+		default:
+			throw new Response(
+				`The _method ${form.get("_method")} is not supported`,
+				{
+					status: 400,
+				},
+			);
+	}
 };
 
 export default function ProverbRoute() {
 	const data = useLoaderData<LoaderData>();
+	const actionData = useActionData<ActionData>();
 
-	return <ProverbDisplay proverb={data.proverb} canDelete={data.canDelete} />;
+	return (
+		<ProverbDisplay
+			proverb={data.proverb}
+			userPermissions={data.userPermissions}
+			actionData={actionData}
+		/>
+	);
 }
 
 export function CatchBoundary() {
