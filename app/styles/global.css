@@ -321,6 +321,8 @@ textarea {
 	color: var(--color-foreground);
 	transition: box-shadow 200ms, border-color 50ms ease-out,
 		background-color 50ms ease-out, color 50ms ease-out;
+	width: 600px;
+	height: 100px;
 }
 
 [data-light] [type="text"],
