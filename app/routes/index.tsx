@@ -1,12 +1,10 @@
 import { Proverb, Role } from "@prisma/client";
 import {
-	json,
 	LinksFunction,
 	LoaderFunction,
 	MetaFunction,
+	redirect,
 } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
-import { ProverbDisplay } from "~/components/proverb";
 
 import stylesUrl from "~/styles/index.css";
 import { db } from "~/utils/db.server";
@@ -76,20 +74,5 @@ export const loader: LoaderFunction = async ({ request }) => {
 		},
 	};
 
-	return json(data);
+	return redirect(`/proverbs/${proverb.id}`);
 };
-
-export default function IndexRoute() {
-	const data = useLoaderData<LoaderData>();
-
-	return (
-		<div className="container">
-			<main className="content">
-				<ProverbDisplay
-					proverb={data.proverb}
-					userPermissions={data.userPermissions}
-				/>
-			</main>
-		</div>
-	);
-}
